@@ -177,6 +177,9 @@ abstract class AbstractExpress extends AppAction implements RedirectLoginInterfa
         $setToken = $this->getRequest()->getParam('token');
         if ($setToken) {
             if ($setToken !== $this->_getSession()->getExpressCheckoutToken()) {
+                $sessionToken = $this->_getSession()->getExpressCheckoutToken();
+                \Magento\Framework\App\ObjectManager::getInstance()
+                    ->get('Psr\Log\LoggerInterface')->critical('PayPal Logging: Session Token: ' . $sessionToken . ', Request Token: ' . $setToken);
                 throw new \Magento\Framework\Exception\LocalizedException(
                     __('A wrong PayPal Express Checkout Token is specified.')
                 );
