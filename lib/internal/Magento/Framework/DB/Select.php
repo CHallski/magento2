@@ -435,7 +435,7 @@ class Select extends \Zend_Db_Select
             }
         }
 
-        return parent::_tableCols($correlationName, $cols, $afterCorrelationName);
+        parent::_tableCols($correlationName, $cols, $afterCorrelationName);
     }
 
     /**
@@ -468,9 +468,9 @@ class Select extends \Zend_Db_Select
     /**
      * Add EXISTS clause
      *
-     * @param  Select $select
-     * @param  string           $joinCondition
-     * @param   bool            $isExists
+     * @param Select $select
+     * @param string $joinCondition
+     * @param bool $isExists
      * @return $this
      */
     public function exists($select, $joinCondition, $isExists = true)
@@ -510,6 +510,8 @@ class Select extends \Zend_Db_Select
     }
 
     /**
+     * Sleep magic method.
+     *
      * @return string[]
      * @since 100.0.11
      */

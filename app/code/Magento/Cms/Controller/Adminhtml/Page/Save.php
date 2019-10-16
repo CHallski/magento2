@@ -1,17 +1,19 @@
 <?php
 /**
- *
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Cms\Controller\Adminhtml\Page;
 
-use Magento\Framework\App\Action\HttpPostActionInterface as HttpPostActionInterface;
+use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Backend\App\Action;
 use Magento\Cms\Model\Page;
 use Magento\Framework\App\Request\DataPersistorInterface;
 use Magento\Framework\Exception\LocalizedException;
 
+/**
+ * Save CMS page action.
+ */
 class Save extends \Magento\Backend\App\Action implements HttpPostActionInterface
 {
     /**
@@ -104,10 +106,6 @@ class Save extends \Magento\Backend\App\Action implements HttpPostActionInterfac
                 'cms_page_prepare_save',
                 ['page' => $model, 'request' => $this->getRequest()]
             );
-
-            if (!$this->dataProcessor->validate($data)) {
-                return $resultRedirect->setPath('*/*/edit', ['page_id' => $model->getId(), '_current' => true]);
-            }
 
             try {
                 $this->pageRepository->save($model);

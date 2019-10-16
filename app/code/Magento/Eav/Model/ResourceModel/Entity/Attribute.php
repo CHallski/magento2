@@ -11,7 +11,9 @@ use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
 use Magento\Eav\Model\Entity\Attribute as EntityAttribute;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\DB\Select;
+use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
 /**
  * EAV attribute resource model
@@ -20,7 +22,7 @@ use Magento\Framework\Model\AbstractModel;
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  * @since 100.0.2
  */
-class Attribute extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
+class Attribute extends AbstractDb
 {
     /**
      * Eav Entity attributes cache
@@ -119,7 +121,7 @@ class Attribute extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
      */
     private function _getMaxSortOrder(AbstractModel $object)
     {
-        if (intval($object->getAttributeGroupId()) > 0) {
+        if ((int)$object->getAttributeGroupId() > 0) {
             $connection = $this->getConnection();
             $bind = [
                 ':attribute_set_id' => $object->getAttributeSetId(),
@@ -190,6 +192,24 @@ class Attribute extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
     }
 
     /**
+     * @inheritdoc
+     *
+     * @param AbstractModel $attribute
+     * @return AbstractDb
+     * @throws CouldNotDeleteException
+     * @since 102.0.3
+     */
+    protected function _beforeDelete(AbstractModel $attribute)
+    {
+        /** @var $attribute \Magento\Eav\Api\Data\AttributeInterface */
+        if ($attribute->getId() && !$attribute->getIsUserDefined()) {
+            throw new CouldNotDeleteException(__("The system attribute can't be deleted."));
+        }
+
+        return parent::_beforeDelete($attribute);
+    }
+
+    /**
      * Save additional attribute data after save attribute
      *
      * @param EntityAttribute|AbstractModel $object
@@ -225,6 +245,8 @@ class Attribute extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
     }
 
     /**
+     * Returns config instance
+     *
      * @return Config
      * @deprecated 100.0.7
      */
@@ -297,10 +319,10 @@ class Attribute extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
      * Save in set including
      *
      * @param AbstractModel $object
-     * @param null $attributeEntityId
-     * @param null $attributeSetId
-     * @param null $attributeGroupId
-     * @param null $attributeSortOrder
+     * @param int|null $attributeEntityId
+     * @param int|null $attributeSetId
+     * @param int|null $attributeGroupId
+     * @param int|null $attributeSortOrder
      * @return $this
      * @SuppressWarnings(PHPMD.NPathComplexity)
      */
@@ -636,6 +658,7 @@ class Attribute extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
 
     /**
      * Load additional attribute data.
+     *
      * Load label of current active store
      *
      * @param EntityAttribute|AbstractModel $object

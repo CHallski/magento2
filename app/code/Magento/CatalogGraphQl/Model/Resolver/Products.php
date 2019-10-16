@@ -71,6 +71,12 @@ class Products implements ResolverInterface
         array $args = null
     ) {
         $searchCriteria = $this->searchCriteriaBuilder->build($field->getName(), $args);
+        if ($args['currentPage'] < 1) {
+            throw new GraphQlInputException(__('currentPage value must be greater than 0.'));
+        }
+        if ($args['pageSize'] < 1) {
+            throw new GraphQlInputException(__('pageSize value must be greater than 0.'));
+        }
         $searchCriteria->setCurrentPage($args['currentPage']);
         $searchCriteria->setPageSize($args['pageSize']);
         if (!isset($args['search']) && !isset($args['filter'])) {
@@ -94,10 +100,10 @@ class Products implements ResolverInterface
 
         $currentPage = $searchCriteria->getCurrentPage();
         if ($searchCriteria->getCurrentPage() > $maxPages && $searchResult->getTotalCount() > 0) {
-            $currentPage = new GraphQlInputException(
+            throw new GraphQlInputException(
                 __(
-                    'currentPage value %1 specified is greater than the number of pages available.',
-                    [$maxPages]
+                    'currentPage value %1 specified is greater than the %2 page(s) available.',
+                    [$currentPage, $maxPages]
                 )
             );
         }
@@ -107,7 +113,8 @@ class Products implements ResolverInterface
             'items' => $searchResult->getProductsSearchResult(),
             'page_info' => [
                 'page_size' => $searchCriteria->getPageSize(),
-                'current_page' => $currentPage
+                'current_page' => $currentPage,
+                'total_pages' => $maxPages
             ],
             'layer_type' => $layerType
         ];
